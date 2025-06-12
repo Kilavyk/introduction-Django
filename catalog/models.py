@@ -48,8 +48,7 @@ class Product(models.Model):
         verbose_name="Категория",
         help_text="Выберите категорию",
         blank=True,
-        null=True,
-        related_name="products"
+        null=True
     )
     purchase_price = models.DecimalField(
         max_digits=10,
@@ -57,8 +56,9 @@ class Product(models.Model):
         verbose_name="Цена за покупку",
         help_text="Введите цену за покупку"
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
+    created_at = models.DateField(
+        blank=True,
+        null=True,
         verbose_name="Дата создания"
     )
     updated_at = models.DateTimeField(
