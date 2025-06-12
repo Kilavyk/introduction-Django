@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.db import models
 
 
@@ -59,6 +61,7 @@ class Product(models.Model):
     created_at = models.DateField(
         blank=True,
         null=True,
+        default=date.today,
         verbose_name="Дата создания"
     )
     updated_at = models.DateTimeField(
