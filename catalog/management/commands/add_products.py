@@ -1,64 +1,18 @@
 from django.core.management.base import BaseCommand
-from catalog.models import Category, Product
-from datetime import date
+from django.core.management import call_command
+from catalog.models import Product, Category
 
 
 class Command(BaseCommand):
-    help = 'Добавляет тестовые продукты в базу данных (с предварительной очисткой)'
+    help = 'Очищает базу и загружает тестовые данные из фикстур'
 
     def handle(self, *args, **options):
-        # Очищаем существующие данные
-        self.stdout.write("Очистка старых данных...")
+        self.stdout.write("Очистка базы данных...")
         Product.objects.all().delete()
         Category.objects.all().delete()
 
-        # Создаем тестовую категорию
-        category, _ = Category.objects.get_or_create(
-            name='Электроника',
-            defaults={'description': 'Гаджеты и устройства'}
-        )
+        self.stdout.write("Загрузка тестовых данных...")
+        call_command('loaddata', 'Category.json', app_label='catalog')
+        call_command('loaddata', 'Product.json', app_label='catalog')
 
-        # Список тестовых продуктов
-        products = [
-            {
-                'name': 'Смартфон X10',
-                'description': 'Флагманский смартфон',
-                'category': category,
-                'purchase_price': 799.99,
-                'created_at': date(2023, 1, 15)
-            },
-            {
-                'name': 'Ноутбук Pro',
-                'description': 'Мощный ноутбук',
-                'category': category,
-                'purchase_price': 1299.99,
-                'created_at': date(2023, 2, 20)
-            },
-            {
-                'name': 'Планшет Mini',
-                'description': 'Компактный планшет',
-                'category': category,
-                'purchase_price': 399.99,
-                'created_at': date(2023, 3, 10)
-            },
-        ]
-
-        # Добавляем продукты
-        for product_data in products:
-            product, created = Product.objects.get_or_create(
-                name=product_data['name'],
-                defaults=product_data
-            )
-
-            if created:
-                self.stdout.write(self.style.SUCCESS(
-                    f'Успешно добавлен продукт: {product.name}'
-                ))
-            else:
-                self.stdout.write(self.style.WARNING(
-                    f'Продукт уже существует: {product.name}'
-                ))
-
-        self.stdout.write(self.style.SUCCESS(
-            "Тестовые продукты успешно добавлены!"
-        ))
+        self.stdout.write(self.style.SUCCESS("Тестовые данные успешно загружены!"))
