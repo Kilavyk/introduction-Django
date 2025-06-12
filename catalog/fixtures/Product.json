@@ -1,0 +1,28 @@
+[
+{
+    "model": "catalog.product",
+    "pk": 6,
+    "fields": {
+        "name": "Смартфон",
+        "description": "Мощный смартфон",
+        "photo": "",
+        "category": 3,
+        "purchase_price": "599.99",
+        "created_at": "2025-06-12",
+        "updated_at": "2025-06-12T14:09:23.940Z"
+    }
+},
+{
+    "model": "catalog.product",
+    "pk": 7,
+    "fields": {
+        "name": "Футболка",
+        "description": "Хлопковая футболка",
+        "photo": "",
+        "category": 4,
+        "purchase_price": "24.99",
+        "created_at": "2025-06-12",
+        "updated_at": "2025-06-12T14:19:32.611Z"
+    }
+}
+]
