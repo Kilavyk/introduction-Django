@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Skystore - {{ product.name }}{% endblock %}
+
+{% block content %}
+{% load my_tags %}
+<!-- Центральное название товара -->
+<div class="text-center mb-5">
+    <h1 class="display-4">{{ product.name }}</h1>
+</div>
+
+<!-- Блок с изображением и описанием -->
+<div class="row">
+    <!-- Левая часть - изображение товара -->
+    <div class="col-md-6">
+        <div class="card mb-4 box-shadow">
+            <div class="card-body text-center">
+                <img src="{{ product.photo | media_filter}}" width="100%" alt="{{ product.name }}">
+            </div>
+        </div>
+    </div>
+
+    <!-- Правая часть - описание товара -->
+    <div class="col-md-6">
+        <div class="card mb-4 box-shadow">
+            <div class="card-body">
+                <h3 class="card-title">Описание</h3>
+                <p class="lead">{{ product.description }}</p>
+                <div class="mt-4">
+
+                    <a href="{% url 'catalog:home' %}" class="btn btn-lg btn-block btn-outline-primary">Вернуться в каталог</a>
+                    <a href="#" class="btn btn-lg btn-block btn-primary">Купить - {{ product.purchase_price }} руб.</a>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
