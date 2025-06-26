@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Редактирование {{ object.title }}{% else %}Создание поста{% endif %} - Skystore{% endblock %}
+
+{% block content %}
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-4">{% if object %}Редактирование поста{% else %}Создание нового поста{% endif %}</h1>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card mb-4 box-shadow">
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_title" class="form-label">Заголовок</label>
+                            {{ form.title }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_content" class="form-label">Содержание</label>
+                            {{ form.content }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_preview" class="form-label">Превью</label>
+                            {{ form.preview }}
+                        </div>
+                        <div class="mb-3 form-check">
+                            {{ form.is_published }}
+                            <label class="form-check-label" for="id_is_published">Опубликовано</label>
+                        </div>
+                        <button type="submit" class="btn btn-lg btn-block btn-primary">Сохранить</button>
+                        <a href="{% if object %}{% url 'blog:post_detail' object.pk %}{% else %}{% url 'blog:post_list' %}{% endif %}" class="btn btn-lg btn-block btn-outline-secondary">Отмена</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
