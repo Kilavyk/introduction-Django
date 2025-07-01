@@ -24,22 +24,23 @@ class ProductForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Общая стилизация для всех полей
+        # стилизация для всех полей
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
 
-            # Специальная стилизация для чекбокса
+            # стилизация для чекбокса
             if isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs['class'] = 'form-check-input'
                 self.fields[field_name].label_attrs = {'class': 'form-check-label'}
 
-            # Добавляем placeholder для текстовых полей
+            # placeholder для текстовых полей
             if isinstance(field.widget, (forms.TextInput, forms.Textarea)):
-                field.widget.attrs['placeholder'] = field.help_text or ''
+                field.widget.attrs['placeholder'] = field.help_text
 
-            # Стилизация для поля цены
+            # стилизация для поля цены
             if field_name == 'purchase_price':
                 field.widget.attrs['step'] = '0.01'
+                field.widget.attrs['placeholder'] = field.help_text
 
     def clean_name(self):
         name = self.cleaned_data['name']
