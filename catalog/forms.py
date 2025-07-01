@@ -22,6 +22,25 @@ class ProductForm(forms.ModelForm):
         model = Product
         fields = '__all__'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Общая стилизация для всех полей
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
+
+            # Специальная стилизация для чекбокса
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs['class'] = 'form-check-input'
+                self.fields[field_name].label_attrs = {'class': 'form-check-label'}
+
+            # Добавляем placeholder для текстовых полей
+            if isinstance(field.widget, (forms.TextInput, forms.Textarea)):
+                field.widget.attrs['placeholder'] = field.help_text or ''
+
+            # Стилизация для поля цены
+            if field_name == 'purchase_price':
+                field.widget.attrs['step'] = '0.01'
+
     def clean_name(self):
         name = self.cleaned_data['name']
         validate_forbidden_words(name)
@@ -29,7 +48,7 @@ class ProductForm(forms.ModelForm):
 
     def clean_description(self):
         description = self.cleaned_data.get('description', '')
-        if description:  # проверяем только если описание не пустое
+        if description:
             validate_forbidden_words(description)
         return description
 
