@@ -1,48 +1,14 @@
-# from itertools import product
-#
-# from django.http import HttpResponse
-# from django.shortcuts import render, get_object_or_404
-#
-# from catalog.models import Product
-#
-#
-# def home(request):
-#     products = Product.objects.all()
-#     context = {"products": products}
-#     return render(request, 'home.html', context)
-#
-# # def contacts(request):
-# #     return render(request, 'contacts.html')
-#
-# def contacts(request):
-#     if request.method == 'POST':
-#         name = request.POST.get('name')
-#         phone = request.POST.get('phone')
-#         message = request.POST.get('message')
-#
-#         # Формируем ответ
-#         response_text = (
-#             f"Пользователь: {name}\n"
-#             f"Телефон: {phone}\n"
-#             f"Сообщение: {message if message else 'Сообщение не указано'}"
-#         )
-#         return HttpResponse(response_text, content_type='text/plain; charset=utf-8')
-#
-#     return render(request, 'contacts.html')
-#
-#
-# def product_detail(request, pk):
-#     product = get_object_or_404(Product, pk=pk)
-#     context = {"product": product}
-#     return render(request, 'product_detail.html', context)
-
-
-from django.views.generic import ListView, DetailView, TemplateView
-from django.views import View
+from django.views.generic import (
+    ListView, DetailView, CreateView, UpdateView, DeleteView, View
+)
+from django.urls import reverse_lazy
+from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import render
 
-from catalog.models import Product
+from .models import Product
+from .forms import ProductForm
 
 
 class HomeView(ListView):
@@ -73,3 +39,35 @@ class ContactsView(View):
             f"Сообщение: {message if message else 'Сообщение не указано'}"
         )
         return HttpResponse(response_text, content_type='text/plain; charset=utf-8')
+
+
+class ProductCreateView(SuccessMessageMixin, CreateView):
+    model = Product
+    form_class = ProductForm
+    success_url = reverse_lazy('catalog:home')
+    success_message = "Продукт успешно создан!"
+    template_name = 'catalog/product_form.html'
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Пожалуйста, исправьте ошибки в форме')
+        return super().form_invalid(form)
+
+class ProductUpdateView(SuccessMessageMixin, UpdateView):
+    model = Product
+    form_class = ProductForm
+    success_url = reverse_lazy('catalog:home')
+    success_message = "Продукт успешно обновлён!"
+    template_name = 'catalog/product_form.html'
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Пожалуйста, исправьте ошибки в форме')
+        return super().form_invalid(form)
+
+class ProductDeleteView(DeleteView):
+    model = Product
+    success_url = reverse_lazy('catalog:home')
+    template_name = 'catalog/product_confirm_delete.html'
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, "Продукт успешно удалён!")
+        return super().delete(request, *args, **kwargs)
