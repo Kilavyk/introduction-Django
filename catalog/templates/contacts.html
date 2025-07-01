@@ -5,25 +5,45 @@
 {% block content %}
 <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
     <h1 class="display-4">Контакты</h1>
+    <p class="lead">Мы всегда рады новым знакомствам и космическим приключениям!</p>
 </div>
 
 <div class="container">
     <div class="row text-start">
         <div class="col-lg-9 col-md-6 col-sm-12">
             <div class="card mb-4 box-shadow">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">Официальная информация</h4>
+                </div>
                 <div class="card-body">
                     <table class="table table-striped">
                         <tr>
-                            <td class="w-25">Страна</td>
-                            <td>USA</td>
+                            <td class="w-25">Галактика</td>
+                            <td>Млечный Путь (филиал Андромеды в разработке)</td>
+                        </tr>
+                        <tr>
+                            <td class="w-25">Планета</td>
+                            <td>Земля (третий камень от Солнца)</td>
+                        </tr>
+                        <tr>
+                            <td class="w-25">Континент</td>
+                            <td>Евразия (но мы мечтаем об офисах на Марсе)</td>
+                        </tr>
+                        <tr>
+                            <td class="w-25">Адрес штаб-квартиры</td>
+                            <td>Кратер Тихо, Луна (пока арендуем коворкинг в Москве)</td>
                         </tr>
                         <tr>
                             <td class="w-25">ИНН</td>
-                            <td>91-1144442</td>
+                            <td>42 (ответ на главный вопрос жизни, вселенной и всего такого)</td>
                         </tr>
                         <tr>
-                            <td class="w-25">Адрес</td>
-                            <td>Redmond,WA,98052-6399</td>
+                            <td class="w-25">Телепорт</td>
+                            <td>+7 (495) 221-XX-XX (XX-XX меняется каждый четверг)</td>
+                        </tr>
+                        <tr>
+                            <td class="w-25">Рабочие часы</td>
+                            <td>25/8 (мы работаем даже в високосные секунды)</td>
                         </tr>
                     </table>
                 </div>
@@ -38,19 +58,38 @@
                     <form method="post" action="" class="form-floating">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <label for="name">Имя</label>
-                            <input type="text" name="name" class="form-control" id="name" placeholder="Ваше имя" required>
+                            <label for="name">Ваше имя</label>
+                            <input type="text" name="name" class="form-control" id="name" placeholder="Как к вам обращаться?" required>
                         </div>
                         <div class="mb-3">
-                            <label for="phone">Телефон</label>
-                            <input type="text" name="phone" class="form-control" id="phone" placeholder="Контактный телефон" required>
+                            <label for="phone">Контактный телефон</label>
+                            <input type="text" name="phone" class="form-control" id="phone" placeholder="Куда перезвонить?" required>
                         </div>
                         <div class="mb-3">
-                            <label for="message">Сообщение</label>
-                            <textarea type="text" name="message" class="form-control" id="message" placeholder="Ваше сообщение" required></textarea>
+                            <label for="message">Сообщение для нас</label>
+                            <textarea name="message" class="form-control" id="message" placeholder="Что вас интересует?" rows="3" required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-lg btn-block btn-outline-primary">Отправить</button>
+                        <button type="submit" class="btn btn-lg btn-block btn-outline-primary">Отправить в космос</button>
                     </form>
+                    <div class="mt-3 text-center small text-muted">
+                        <p></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card mb-4 box-shadow">
+                <div class="card-body text-center">
+                    <h4>Наша миссия</h4>
+                    <p class="lead">Доставлять технологии на край вселенной и обратно!</p>
+                    <img src="https://my.sky.pro/5987ea2b7acbe5e5379157f8c4f0fb7f.svg" width="100" alt="Команда SkyPro" class="img-fluid rounded">
+                    <div class="mt-3">
+                        <p>Факт: 98% наших сотрудников - роботы. Но это не точно.</p>
+                        <p class="small text-muted">*Все данные вымышлены, любые совпадения случайны.
+                            Разработано с ❤️ студентом Михаилом (SkyPro2025)</p>
+                    </div>
                 </div>
             </div>
         </div>
