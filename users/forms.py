@@ -1,6 +1,8 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, UserChangeForm, UserCreationForm
+
 from .models import User
+
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(label='Email')
@@ -14,3 +16,18 @@ class UserRegisterForm(UserCreationForm):
 class UserLoginForm(AuthenticationForm):
     username = forms.EmailField(label='Email')  # Переопределяем username как email
     password = forms.CharField(label='Пароль', widget=forms.PasswordInput)
+
+
+class UserProfileForm(UserChangeForm):
+    password = None  # Убираем поле смены пароля
+
+    class Meta:
+        model = User
+        fields = ('email', 'first_name', 'last_name', 'phone', 'country', 'avatar')
+
+
+class UserDeleteForm(forms.Form):
+    confirm = forms.BooleanField(
+        label="Я подтверждаю удаление аккаунта",
+        required=True
+    )
