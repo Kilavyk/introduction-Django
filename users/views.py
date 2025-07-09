@@ -1,49 +1,77 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate
-from django.contrib import messages
-from django.core.mail import send_mail
 from django.conf import settings
-from .forms import UserRegisterForm, UserLoginForm
+from django.contrib import messages
 from django.contrib.auth import logout
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView
+from django.core.mail import send_mail
+from django.urls import reverse_lazy
+from django.views.generic import FormView, RedirectView, TemplateView, UpdateView
+
+from .forms import UserDeleteForm, UserLoginForm, UserProfileForm, UserRegisterForm
+from .models import User
 
 
-def register(request):
-    if request.method == 'POST':
-        form = UserRegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
+class UserRegisterView(FormView):
+    template_name = 'users/register.html'
+    form_class = UserRegisterForm
+    success_url = reverse_lazy('users:login')
 
-            # Отправка приветственного письма
-            send_mail(
-                'Добро пожаловать!',
-                'Спасибо за регистрацию в нашем сервисе.',
-                settings.EMAIL_HOST_USER,
-                [user.email],
-                fail_silently=False,
-            )
+    def form_valid(self, form):
+        user = form.save()
 
-            messages.success(request, 'Вы успешно зарегистрированы!')
-            return redirect('users:login')
-    else:
-        form = UserRegisterForm()
-    return render(request, 'users/register.html', {'form': form})
+        # Отправка приветственного письма
+        send_mail(
+            'Добро пожаловать!',
+            'Спасибо за регистрацию в нашем сервисе.',
+            settings.EMAIL_HOST_USER,
+            [user.email],
+            fail_silently=False,
+        )
 
-
-def user_login(request):
-    if request.method == 'POST':
-        form = UserLoginForm(data=request.POST)
-        if form.is_valid():
-            email = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(email=email, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('catalog:home')
-    else:
-        form = UserLoginForm()
-    return render(request, 'users/login.html', {'form': form})
+        messages.success(self.request, 'Вы успешно зарегистрированы!')
+        return super().form_valid(form)
 
 
-def user_logout(request):
-    logout(request)
-    return redirect('catalog:home')
+class UserLoginView(LoginView):
+    template_name = 'users/login.html'
+    form_class = UserLoginForm
+    redirect_authenticated_user = True
+
+    def get_success_url(self):
+        return reverse_lazy('catalog:home')
+
+
+class UserLogoutView(RedirectView):
+    url = reverse_lazy('catalog:home')
+
+    def get(self, request, *args, **kwargs):
+        logout(request)
+        messages.info(request, 'Вы успешно вышли из системы')
+        return super().get(request, *args, **kwargs)
+
+
+class ProfileView(LoginRequiredMixin, UpdateView):
+    model = User
+    form_class = UserProfileForm
+    template_name = 'users/profile.html'
+    success_url = reverse_lazy('users:profile')
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Профиль успешно обновлен')
+        return super().form_valid(form)
+
+
+class DeleteAccountView(LoginRequiredMixin, FormView):
+    template_name = 'users/delete_account.html'
+    form_class = UserDeleteForm
+    success_url = reverse_lazy('catalog:home')
+
+    def form_valid(self, form):
+        user = self.request.user
+        logout(self.request)
+        user.delete()
+        messages.success(self.request, 'Ваш аккаунт был успешно удален')
+        return super().form_valid(form)
