@@ -17,6 +17,11 @@ class HomeView(ListView):
     template_name = 'home.html'
     context_object_name = 'products'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user'] = self.request.user  # Добавляем пользователя в контекст
+        return context
+
 
 class ProductDetailView(LoginRequiredMixin, DetailView):
     model = Product
@@ -60,6 +65,10 @@ class ProductCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         kwargs['user'] = self.request.user
         return kwargs
 
+    def form_valid(self, form):
+        form.instance.owner = self.request.user  # Автоматически назначаем владельца
+        return super().form_valid(form)
+
 
 class ProductUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Product
@@ -79,6 +88,11 @@ class ProductUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         # Проверяем, может ли пользователь отменять публикацию
         if request.POST.get("unpublish") and not request.user.has_perm("catalog.can_unpublish_product"):
             raise PermissionDenied("У вас нет прав на отмену публикации!")
+
+        # Проверяем, является ли пользователь владельцем или модератором
+        if not (product.owner == request.user or request.user.has_perm('catalog.change_product')):
+            raise PermissionDenied("Вы не можете редактировать этот продукт!")
+
         return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
@@ -97,8 +111,12 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.has_perm("catalog.delete_product"):
-            raise PermissionDenied("У вас нет прав на удаление продукта!")
+        product = self.get_object()
+
+        # Является ли пользователь владельцем или имеет право удалять любой продукт
+        if not (product.owner == request.user or request.user.has_perm('catalog.delete_any_product')):
+            raise PermissionDenied("Вы не можете удалить этот продукт!")
+
         return super().dispatch(request, *args, **kwargs)
 
 @permission_required('catalog.can_unpublish_product')
