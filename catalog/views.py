@@ -1,9 +1,10 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView, View
 
@@ -54,6 +55,11 @@ class ProductCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         messages.error(self.request, 'Пожалуйста, исправьте ошибки в форме')
         return super().form_invalid(form)
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
 
 class ProductUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Product
@@ -67,6 +73,19 @@ class ProductUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         messages.error(self.request, 'Пожалуйста, исправьте ошибки в форме')
         return super().form_invalid(form)
 
+    def dispatch(self, request, *args, **kwargs):
+        product = self.get_object()
+
+        # Проверяем, может ли пользователь отменять публикацию
+        if request.POST.get("unpublish") and not request.user.has_perm("catalog.can_unpublish_product"):
+            raise PermissionDenied("У вас нет прав на отмену публикации!")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
 class ProductDeleteView(LoginRequiredMixin, DeleteView):
     model = Product
     success_url = reverse_lazy('catalog:home')
@@ -76,3 +95,24 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Продукт успешно удалён!")
         return super().delete(request, *args, **kwargs)
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.has_perm("catalog.delete_product"):
+            raise PermissionDenied("У вас нет прав на удаление продукта!")
+        return super().dispatch(request, *args, **kwargs)
+
+@permission_required('catalog.can_unpublish_product')
+def unpublish_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    product.status = 'draft'
+    product.save()
+    messages.success(request, 'Публикация продукта отменена')
+    return redirect('catalog:product_detail', pk=pk)
+
+@permission_required('catalog.can_unpublish_product')
+def publish_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    product.status = 'published'
+    product.save()
+    messages.success(request, 'Продукт опубликован')
+    return redirect('catalog:product_detail', pk=pk)
