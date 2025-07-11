@@ -1,5 +1,5 @@
 from datetime import date
-
+from django.conf import settings
 from django.db import models
 
 
@@ -81,6 +81,15 @@ class Product(models.Model):
         choices=PUBLISH_STATUS,
         default='draft',
         verbose_name="Статус публикации"
+    )
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Владелец",
+        help_text="Пользователь, создавший продукт"
     )
 
     class Meta:
