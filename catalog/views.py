@@ -17,11 +17,12 @@ class HomeView(ListView):
     context_object_name = 'products'
 
 
-class ProductDetailView(DetailView):
+class ProductDetailView(LoginRequiredMixin, DetailView):
     model = Product
     template_name = 'product_detail.html'
     context_object_name = 'product'
     pk_url_kwarg = 'pk'
+    login_url = reverse_lazy('users:login')
 
 
 class ContactsView(View):
