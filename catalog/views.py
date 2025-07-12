@@ -89,8 +89,8 @@ class ProductUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         if request.POST.get("unpublish") and not request.user.has_perm("catalog.can_unpublish_product"):
             raise PermissionDenied("У вас нет прав на отмену публикации!")
 
-        # Проверяем, является ли пользователь владельцем или модератором
-        if not (product.owner == request.user or request.user.has_perm('catalog.change_product')):
+        # Проверяем, является ли пользователь владельцем или администратором
+        if not (product.owner == request.user or request.user.is_staff):
             raise PermissionDenied("Вы не можете редактировать этот продукт!")
 
         return super().dispatch(request, *args, **kwargs)
@@ -113,8 +113,9 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
     def dispatch(self, request, *args, **kwargs):
         product = self.get_object()
 
-        # Является ли пользователь владельцем или имеет право удалять любой продукт
-        if not (product.owner == request.user or request.user.has_perm('catalog.delete_any_product')):
+        # Является ли пользователь владельцем или администратором
+        if not (product.owner == request.user or request.user.is_staff or request.user.has_perm(
+                'catalog.delete_any_product')):
             raise PermissionDenied("Вы не можете удалить этот продукт!")
 
         return super().dispatch(request, *args, **kwargs)
