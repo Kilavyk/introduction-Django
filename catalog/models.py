@@ -1,5 +1,5 @@
 from datetime import date
-
+from django.conf import settings
 from django.db import models
 
 
@@ -69,10 +69,36 @@ class Product(models.Model):
         verbose_name="Дата последнего изменения"
     )
 
+    # Добавляем статус публикации
+    PUBLISH_STATUS = [
+        ('draft', 'Черновик'),
+        ('published', 'Опубликован'),
+        ('rejected', 'Отклонен'),
+    ]
+
+    status = models.CharField(
+        max_length=10,
+        choices=PUBLISH_STATUS,
+        default='draft',
+        verbose_name="Статус публикации"
+    )
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Владелец",
+        help_text="Пользователь, создавший продукт"
+    )
+
     class Meta:
         verbose_name = "Продукт"
         verbose_name_plural = "Продукты"
         ordering = ["name", "category", "purchase_price"]
-
+        permissions = [
+            ("can_unpublish_product", "Может отменять публикацию продукта"),
+            ("can_delete_any_product", "Может удалять любой продукт"),
+        ]
     def __str__(self):
         return self.name

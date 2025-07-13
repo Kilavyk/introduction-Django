@@ -12,7 +12,7 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'purchase_price', 'category', 'created_at')  # Поля в списке
-    list_filter = ('category', 'created_at',)  # Фильтрация по категории и дате создания
+    list_filter = ('category', 'created_at',  'owner')  # Фильтрация
     search_fields = ('name', 'description')  # Поля для поиска
 
     list_editable = ('purchase_price', 'category')  # Возможность редактировать прямо из списка

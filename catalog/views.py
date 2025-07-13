@@ -1,9 +1,10 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView, View
 
@@ -15,6 +16,11 @@ class HomeView(ListView):
     model = Product
     template_name = 'home.html'
     context_object_name = 'products'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user'] = self.request.user  # Добавляем пользователя в контекст
+        return context
 
 
 class ProductDetailView(LoginRequiredMixin, DetailView):
@@ -54,6 +60,15 @@ class ProductCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         messages.error(self.request, 'Пожалуйста, исправьте ошибки в форме')
         return super().form_invalid(form)
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user  # Автоматически назначаем владельца
+        return super().form_valid(form)
+
 
 class ProductUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Product
@@ -67,6 +82,24 @@ class ProductUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         messages.error(self.request, 'Пожалуйста, исправьте ошибки в форме')
         return super().form_invalid(form)
 
+    def dispatch(self, request, *args, **kwargs):
+        product = self.get_object()
+
+        # Проверяем, может ли пользователь отменять публикацию
+        if request.POST.get("unpublish") and not request.user.has_perm("catalog.can_unpublish_product"):
+            raise PermissionDenied("У вас нет прав на отмену публикации!")
+
+        # Проверяем, является ли пользователь владельцем или администратором
+        if not (product.owner == request.user or request.user.is_staff):
+            raise PermissionDenied("Вы не можете редактировать этот продукт!")
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
 class ProductDeleteView(LoginRequiredMixin, DeleteView):
     model = Product
     success_url = reverse_lazy('catalog:home')
@@ -76,3 +109,29 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Продукт успешно удалён!")
         return super().delete(request, *args, **kwargs)
+
+    def dispatch(self, request, *args, **kwargs):
+        product = self.get_object()
+
+        # Является ли пользователь владельцем или администратором
+        if not (product.owner == request.user or request.user.is_staff or request.user.has_perm(
+                'catalog.can_delete_any_product')):
+            raise PermissionDenied("Вы не можете удалить этот продукт!")
+
+        return super().dispatch(request, *args, **kwargs)
+
+@permission_required('catalog.can_unpublish_product')
+def unpublish_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    product.status = 'draft'
+    product.save()
+    messages.success(request, 'Публикация продукта отменена')
+    return redirect('catalog:product_detail', pk=pk)
+
+@permission_required('catalog.can_unpublish_product')
+def publish_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    product.status = 'published'
+    product.save()
+    messages.success(request, 'Продукт опубликован')
+    return redirect('catalog:product_detail', pk=pk)

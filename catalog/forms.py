@@ -24,7 +24,16 @@ class ProductForm(forms.ModelForm):
         fields = '__all__'
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+
+        # Убираем поле owner
+        self.fields.pop('owner', None)
+
+        # Если пользователь не модератор - скрываем поле статуса
+        if not user or not user.has_perm('catalog.can_unpublish_product'):
+            self.fields.pop('status', None)
+
         # стилизация для всех полей
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
