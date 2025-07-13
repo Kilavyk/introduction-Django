@@ -8,7 +8,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # Получаем разрешения
         unpublish_perm = Permission.objects.get(codename="can_unpublish_product")
-        delete_perm = Permission.objects.get(codename="delete_product")
+        delete_perm = Permission.objects.get(codename="can_delete_any_product")
 
         # Создаем группу
         group, created = Group.objects.get_or_create(name="Модератор продуктов")
