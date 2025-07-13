@@ -48,7 +48,7 @@
                     {% endif %}
                     {% endif %}
 
-                    {% if product.owner == user or user.is_staff or perms.catalog.delete_product %}
+                    {% if product.owner == user or user.is_staff or perms.catalog.can_delete_any_product %}
                     <div class="btn-group">
                         <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-sm btn-outline-secondary">Изменить</a>
                         <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>

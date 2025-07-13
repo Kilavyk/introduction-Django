@@ -115,7 +115,7 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
 
         # Является ли пользователь владельцем или администратором
         if not (product.owner == request.user or request.user.is_staff or request.user.has_perm(
-                'catalog.delete_any_product')):
+                'catalog.can_delete_any_product')):
             raise PermissionDenied("Вы не можете удалить этот продукт!")
 
         return super().dispatch(request, *args, **kwargs)
