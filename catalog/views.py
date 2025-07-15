@@ -12,6 +12,22 @@ from .forms import ProductForm
 from .models import Product
 
 
+class CategoryProductsView(ListView):
+    model = Product
+    template_name = 'category_products.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        category_name = self.kwargs['category_name']
+        return get_products_by_category(category_name)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category_name'] = self.kwargs['category_name']
+        context['user'] = self.request.user
+        return context
+
+
 class HomeView(ListView):
     model = Product
     template_name = 'home.html'
@@ -135,3 +151,10 @@ def publish_product(request, pk):
     product.save()
     messages.success(request, 'Продукт опубликован')
     return redirect('catalog:product_detail', pk=pk)
+
+def get_products_by_category(category_name):
+    """Сервисная функция для получения продуктов по категории"""
+    return Product.objects.filter(
+        category__name=category_name,
+        status='published'  # Только опубликованные продукты
+    ).select_related('category')
