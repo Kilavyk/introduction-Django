@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Продукты категории {{ category_name }} - Skystore{% endblock %}
+
+{% block content %}
+{% load my_tags %}
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-4">Продукты категории "{{ category_name }}"</h1>
+    {% if user.is_authenticated %}
+    <a href="{% url 'catalog:product_create' %}" class="btn btn-lg btn-outline-primary">Добавить продукт</a>
+    {% endif %}
+</div>
+
+<div class="container">
+    {% if products %}
+    <div class="row text-center">
+        {% for product in products %}
+        <div class="col-3">
+            <div class="card mb-4 box-shadow">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">{{ product.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <img src="{{ product.photo | media_filter}}" width="100%" alt="{{ product.name }}">
+                    <ul class="list-unstyled mt-3 mb-4 text-start m-3">
+                        <li>{{ product.description | truncatechars:100 }}</li>
+                    </ul>
+                    <a href="{% url 'catalog:product_detail' product.pk %}" class="btn btn-lg btn-block btn-outline-primary">Подробнее</a>
+                    <div class="mt-2">
+                        {% if user.is_authenticated %}
+                            {% if product.owner == user or user.is_staff %}
+                            <div class="btn-group">
+                            <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-sm btn-outline-secondary">Изменить</a>
+                            <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                            </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center">
+        В этой категории пока нет продуктов.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

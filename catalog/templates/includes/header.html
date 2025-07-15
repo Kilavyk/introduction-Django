@@ -4,6 +4,20 @@
         <a class="p-2 btn btn-outline-primary me-2" href="{% url 'catalog:home' %}">Каталог</a>
         <a class="p-2 btn btn-outline-primary me-2" href="{% url 'catalog:contacts' %}">Контакты</a>
         <a class="p-2 btn btn-outline-primary" href="{% url 'blog:post_list' %}">Блог</a>
+
+        <!-- Выпадающий список категорий -->
+        {% if categories %}  <!-- Проверяем, что категории существуют -->
+        <div class="dropdown ms-2">
+            <button class="p-2 btn btn-outline-primary me-2 dropdown-toggle" type="button" id="categoriesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                Категории
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
+                {% for category in categories %}
+                    <li><a class="dropdown-item" href="{% url 'catalog:category_products' category.name %}">{{ category.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
     </nav>
 
     <!-- Центральная часть -->
