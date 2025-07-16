@@ -10,6 +10,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, U
 
 from .forms import ProductForm
 from .models import Product
+from .services import get_product_from_cache
 
 
 class CategoryProductsView(ListView):
@@ -37,6 +38,9 @@ class HomeView(ListView):
         context = super().get_context_data(**kwargs)
         context['user'] = self.request.user  # Добавляем пользователя в контекст
         return context
+
+    def get_queryset(self):
+        return get_product_from_cache()
 
 
 class ProductDetailView(LoginRequiredMixin, DetailView):
